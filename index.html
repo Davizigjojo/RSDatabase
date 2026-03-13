@@ -3,106 +3,134 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BlazerCloud - Nuvem Pessoal</title>
+    <title>BlazerCloud - Armazenamento Seguro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         body { background-color: #0d0f17; color: #f1f5f9; font-family: 'Inter', sans-serif; }
         .glass-card { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.05); }
-        .accent-blue { background: #3b82f6; }
-        .progress-bar { transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        .accent-blue { background: #3b82f6; transition: all 0.3s; }
+        .accent-blue:hover { background: #2563eb; transform: translateY(-1px); }
+        .progress-bar { transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
+        .file-card { transition: all 0.2s; }
+        .file-card:hover { background: rgba(255,255,255,0.05); transform: scale(1.01); }
+        .hidden { display: none; }
+        /* Animação suave */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade { animation: fadeIn 0.4s ease-out forwards; }
     </style>
 </head>
 <body class="min-h-screen pb-10">
 
-    <!-- TELA DE LOGIN -->
+    <!-- TELA DE AUTENTICAÇÃO -->
     <div id="auth-screen" class="flex items-center justify-center min-h-screen p-4">
-        <div class="w-full max-w-md glass-card p-8 rounded-3xl shadow-2xl">
+        <div class="w-full max-w-md glass-card p-8 rounded-3xl shadow-2xl animate-fade">
             <div class="text-center mb-10">
-                <h1 class="text-3xl font-black tracking-tighter text-blue-500 italic">BLAZER<span class="text-white">CLOUD</span></h1>
-                <p class="text-slate-400 text-sm mt-1">Sua conta de armazenamento seguro</p>
+                <h1 class="text-3xl font-black tracking-tighter text-blue-500 italic uppercase">BLAZER<span class="text-white">CLOUD</span></h1>
+                <p class="text-slate-400 text-sm mt-1">Seu backup em boas mãos</p>
             </div>
             
-            <div class="space-y-5">
-                <div>
-                    <input type="text" id="user" class="w-full bg-slate-900/50 border border-slate-700 rounded-2xl px-5 py-4 focus:ring-2 focus:ring-blue-500 outline-none transition-all" placeholder="Usuário">
+            <div class="space-y-4">
+                <div class="relative">
+                    <i class="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
+                    <input type="text" id="user" class="w-full bg-slate-900/50 border border-slate-700 rounded-2xl pl-10 pr-5 py-4 focus:ring-2 focus:ring-blue-500 outline-none transition-all" placeholder="Usuário">
                 </div>
-                <div>
-                    <input type="password" id="pass" class="w-full bg-slate-900/50 border border-slate-700 rounded-2xl px-5 py-4 focus:ring-2 focus:ring-blue-500 outline-none transition-all" placeholder="Senha">
+                <div class="relative">
+                    <i class="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
+                    <input type="password" id="pass" class="w-full bg-slate-900/50 border border-slate-700 rounded-2xl pl-10 pr-5 py-4 focus:ring-2 focus:ring-blue-500 outline-none transition-all" placeholder="Senha">
                 </div>
-                <button onclick="fazerLogin()" id="btn-login" class="w-full accent-blue py-4 rounded-2xl font-bold text-lg hover:brightness-110 active:scale-95 transition-all">ENTRAR</button>
-                <button onclick="fazerRegistro()" class="w-full text-slate-400 text-sm hover:text-white transition-colors">Ainda não tem conta? <span class="text-blue-500 font-bold">Criar agora</span></button>
+                <button onclick="fazerLogin()" id="btn-login" class="w-full accent-blue py-4 rounded-2xl font-bold text-lg shadow-lg shadow-blue-500/20">ENTRAR</button>
+                <button onclick="fazerRegistro()" class="w-full text-slate-500 text-xs hover:text-blue-400 transition-colors py-2 uppercase tracking-widest font-bold">Criar nova conta</button>
             </div>
-            <p id="auth-msg" class="text-center mt-6 text-sm"></p>
+            <p id="auth-msg" class="text-center mt-6 text-[10px] uppercase font-bold tracking-widest text-slate-500 italic">Verificando status do servidor...</p>
         </div>
     </div>
 
     <!-- PAINEL DO USUÁRIO -->
-    <div id="main-screen" class="hidden animate-in fade-in duration-500">
+    <div id="main-screen" class="hidden">
         <header class="p-6 flex justify-between items-center max-w-5xl mx-auto">
-            <h2 class="text-xl font-black text-blue-500 italic">BLAZER<span class="text-white">CLOUD</span></h2>
-            <button onclick="sair()" class="text-slate-400 hover:text-red-400 text-sm font-bold flex items-center gap-2">
-                SAIR <i class="fas fa-sign-out-alt"></i>
-            </button>
+            <h2 class="text-xl font-black text-blue-500 italic uppercase">BLAZER<span class="text-white">CLOUD</span></h2>
+            <div class="flex items-center gap-4">
+                <span id="user-display" class="text-xs font-bold text-slate-500 hidden sm:inline"></span>
+                <button onclick="sair()" class="text-slate-400 hover:text-red-400 text-xs font-black uppercase tracking-tighter flex items-center gap-2">
+                    Sair <i class="fas fa-power-off"></i>
+                </button>
+            </div>
         </header>
 
-        <main class="max-w-xl mx-auto px-6">
-            <!-- Card de Armazenamento -->
-            <div class="glass-card rounded-3xl p-6 mb-8 border-b-4 border-blue-500">
+        <main class="max-w-xl mx-auto px-6 animate-fade">
+            <!-- Barra de Cota -->
+            <div class="glass-card rounded-3xl p-6 mb-8 border-l-4 border-blue-500 shadow-xl">
                 <div class="flex justify-between items-end mb-3">
-                    <p class="text-slate-400 text-xs font-bold uppercase tracking-widest">Espaço Utilizado</p>
-                    <span id="perc-txt" class="text-blue-400 font-black">0%</span>
+                    <div>
+                        <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-1">Armazenamento</p>
+                        <p id="quota-txt" class="text-white font-bold text-sm">Carregando...</p>
+                    </div>
+                    <span id="perc-txt" class="text-blue-400 font-black text-xl italic">0%</span>
                 </div>
-                <div class="w-full bg-slate-800 h-4 rounded-full overflow-hidden mb-3">
+                <div class="w-full bg-slate-800 h-3 rounded-full overflow-hidden">
                     <div id="barra-uso" class="progress-bar h-full accent-blue" style="width: 0%"></div>
                 </div>
-                <p id="quota-txt" class="text-slate-300 text-sm">Carregando informações...</p>
             </div>
 
-            <!-- Botão de Upload -->
+            <!-- Upload Area -->
             <div class="mb-10">
-                <label for="input-file" class="flex flex-col items-center justify-center glass-card border-2 border-dashed border-slate-700 rounded-3xl p-10 cursor-pointer hover:border-blue-500/50 transition-all">
+                <label for="input-file" class="flex flex-col items-center justify-center glass-card border-2 border-dashed border-slate-700 rounded-3xl p-8 cursor-pointer hover:border-blue-500/40 transition-all group">
                     <input type="file" id="input-file" class="hidden" onchange="arquivoSelecionado()">
-                    <div class="bg-blue-500/10 p-5 rounded-full mb-4">
+                    <div class="bg-blue-500/10 p-5 rounded-full mb-4 group-hover:scale-110 transition-transform">
                         <i class="fas fa-cloud-upload-alt text-3xl text-blue-500"></i>
                     </div>
-                    <span id="status-upload" class="font-bold text-slate-200 text-center">Selecionar arquivo</span>
-                    <span class="text-slate-500 text-xs mt-1">PDF, ZIP, Imagens e mais</span>
+                    <span id="status-upload" class="font-bold text-slate-200 text-sm text-center">Tocar para enviar arquivo</span>
+                    <span class="text-slate-500 text-[10px] uppercase mt-1 tracking-widest">Máximo 500MB</span>
                 </label>
                 
-                <div id="upload-actions" class="hidden mt-4 space-y-3">
-                    <input type="text" id="desc-file" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 outline-none" placeholder="Descrição rápida...">
-                    <button onclick="enviarArquivo()" id="btn-up" class="w-full accent-blue py-3 rounded-xl font-bold shadow-lg shadow-blue-500/20">SUBIR PARA A NUVEM</button>
+                <div id="upload-actions" class="hidden mt-4 space-y-3 animate-fade">
+                    <input type="text" id="desc-file" class="w-full bg-slate-900 border border-slate-700 rounded-2xl px-5 py-4 outline-none focus:border-blue-500 transition-colors" placeholder="Descrição curta (ex: Backup Foto)">
+                    <button onclick="enviarArquivo()" id="btn-up" class="w-full accent-blue py-4 rounded-2xl font-bold shadow-lg">INICIAR UPLOAD</button>
                 </div>
             </div>
 
-            <!-- Lista -->
-            <div class="flex justify-between items-center mb-4 px-2">
-                <h3 class="font-black text-slate-400 text-xs uppercase tracking-widest">Meus Arquivos</h3>
-                <button onclick="listarArquivos()" class="text-blue-500 text-xs font-bold hover:rotate-180 transition-all duration-500"><i class="fas fa-sync-alt"></i></button>
+            <!-- Lista de Arquivos -->
+            <div class="flex justify-between items-center mb-6 px-2">
+                <h3 class="font-black text-slate-500 text-[10px] uppercase tracking-widest italic">Arquivos na Nuvem</h3>
+                <button onclick="listarArquivos()" class="text-blue-500 text-sm p-2 hover:bg-blue-500/10 rounded-full transition-all"><i class="fas fa-sync-alt"></i></button>
             </div>
             
             <div id="lista" class="space-y-3">
-                <!-- Itens via JS -->
+                <!-- Itens injetados pelo JS -->
             </div>
         </main>
     </div>
 
     <script>
-        // ENDEREÇO DO SEU SERVIDOR CONFORME PRINT
+        // CONFIGURAÇÃO DE IP (Conforme seus prints)
         const API = "http://blazercraft.falixsrv.me:57488";
 
-        // Auto-login
-        if(localStorage.getItem('token')) mostrarPainel();
+        // Verifica status ao abrir
+        window.onload = async () => {
+            const msg = document.getElementById('auth-msg');
+            try {
+                // Requisição silenciosa para testar conexão
+                await fetch(`${API}/arquivos`, { mode: 'no-cors' });
+                msg.innerText = "Conectado ao BlazerCloud";
+                msg.style.color = "#4ade80";
+            } catch (e) {
+                msg.innerText = "Erro de conexão (HTTPS/Offline)";
+                msg.style.color = "#f87171";
+            }
+
+            if(localStorage.getItem('token')) mostrarPainel();
+        };
 
         async function fazerLogin() {
             const u = document.getElementById('user').value;
             const p = document.getElementById('pass').value;
             const btn = document.getElementById('btn-login');
-            const msg = document.getElementById('auth-msg');
-
-            if(!u || !p) return;
-            btn.innerText = "VERIFICANDO...";
+            
+            if(!u || !p) return alert("Preencha os campos!");
+            
+            btn.innerText = "AUTENTICANDO...";
             btn.disabled = true;
 
             try {
@@ -112,23 +140,26 @@
                     body: JSON.stringify({username: u, password: p})
                 });
                 const data = await res.json();
+                
                 if(res.ok) {
                     localStorage.setItem('token', data.token);
                     localStorage.setItem('user', u);
                     mostrarPainel();
                 } else {
-                    msg.innerText = data.erro;
-                    msg.style.color = "#f87171";
+                    alert(data.erro || "Credenciais incorretas");
                 }
-            } catch(e) { msg.innerText = "Servidor Offline"; }
-            btn.innerText = "ENTRAR";
-            btn.disabled = false;
+            } catch(e) {
+                alert("Erro: Não foi possível alcançar o servidor.");
+            } finally {
+                btn.innerText = "ENTRAR";
+                btn.disabled = false;
+            }
         }
 
         async function fazerRegistro() {
             const u = document.getElementById('user').value;
             const p = document.getElementById('pass').value;
-            if(!u || !p) return alert("Preencha os campos!");
+            if(!u || !p) return alert("Preencha usuário e senha!");
 
             try {
                 const res = await fetch(`${API}/register`, {
@@ -136,15 +167,18 @@
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({username: u, password: p})
                 });
-                const data = await res.json();
-                if(res.ok) alert("Conta criada! Pode logar.");
-                else alert(data.erro);
-            } catch(e) { alert("Erro de conexão"); }
+                if(res.ok) alert("Conta criada com sucesso! Pode entrar.");
+                else {
+                    const d = await res.json();
+                    alert(d.erro);
+                }
+            } catch(e) { alert("Erro de rede"); }
         }
 
         function mostrarPainel() {
             document.getElementById('auth-screen').classList.add('hidden');
             document.getElementById('main-screen').classList.remove('hidden');
+            document.getElementById('user-display').innerText = `Usuário: ${localStorage.getItem('user')}`;
             atualizarCota();
             listarArquivos();
         }
@@ -164,7 +198,7 @@
                 document.getElementById('quota-txt').innerText = `${mbUsado} MB usados de 500 MB`;
                 document.getElementById('perc-txt').innerText = `${d.percentual}%`;
                 document.getElementById('barra-uso').style.width = `${d.percentual}%`;
-            } catch(e) {}
+            } catch(e) { console.error("Erro cota"); }
         }
 
         function arquivoSelecionado() {
@@ -184,7 +218,7 @@
             fd.append('arquivo', input.files[0]);
             fd.append('descricao', desc);
 
-            btn.innerText = "SUBINDO...";
+            btn.innerText = "ENVIANDO ARQUIVO...";
             btn.disabled = true;
 
             try {
@@ -194,20 +228,22 @@
                     body: fd
                 });
                 if(res.ok) {
-                    alert("Sucesso!");
+                    alert("Upload concluído!");
                     location.reload();
                 } else {
                     const d = await res.json();
                     alert(d.erro);
                 }
-            } catch(e) { alert("Erro no upload"); }
-            btn.innerText = "SUBIR PARA A NUVEM";
-            btn.disabled = false;
+            } catch(e) { alert("Erro fatal no upload"); }
+            finally {
+                btn.innerText = "INICIAR UPLOAD";
+                btn.disabled = false;
+            }
         }
 
         async function listarArquivos() {
             const container = document.getElementById('lista');
-            container.innerHTML = '<p class="text-center text-slate-500 animate-pulse">Lendo arquivos...</p>';
+            container.innerHTML = '<p class="text-center text-slate-500 text-xs py-10 animate-pulse uppercase font-black italic">Sincronizando arquivos...</p>';
             
             try {
                 const res = await fetch(`${API}/arquivos`, {
@@ -216,45 +252,56 @@
                 const files = await res.json();
                 
                 if(files.length === 0) {
-                    container.innerHTML = '<div class="text-center py-10 opacity-30"><i class="fas fa-folder-open text-4xl mb-2"></i><p>Nada aqui ainda</p></div>';
+                    container.innerHTML = `
+                        <div class="text-center py-10 glass-card rounded-3xl opacity-40">
+                            <i class="fas fa-folder-open text-3xl mb-3"></i>
+                            <p class="text-xs uppercase font-bold tracking-widest">Nenhum arquivo encontrado</p>
+                        </div>
+                    `;
                     return;
                 }
 
                 container.innerHTML = "";
                 files.forEach(f => {
                     const item = document.createElement('div');
-                    item.className = "glass-card p-4 rounded-2xl flex items-center justify-between";
+                    item.className = "glass-card p-4 rounded-2xl flex items-center justify-between file-card animate-fade";
                     item.innerHTML = `
                         <div class="flex items-center gap-3 overflow-hidden">
                             <div class="bg-blue-500/10 p-3 rounded-xl text-blue-500">
-                                <i class="fas fa-file-alt"></i>
+                                <i class="fas ${f.nome.endsWith('.zip') ? 'fa-file-archive' : 'fa-file-alt'}"></i>
                             </div>
                             <div class="overflow-hidden">
-                                <p class="font-bold text-sm truncate">${f.nome}</p>
-                                <p class="text-[10px] text-slate-500">${f.tamanho} • ${f.data}</p>
+                                <p class="font-bold text-sm truncate text-slate-100">${f.nome}</p>
+                                <p class="text-[9px] text-slate-500 font-bold uppercase tracking-tighter">${f.tamanho} • ${f.data}</p>
+                                ${f.desc ? `<p class="text-[10px] text-blue-400 italic truncate">${f.desc}</p>` : ''}
                             </div>
                         </div>
                         <div class="flex gap-1">
-                            <button onclick="window.open('${API}/download/${f.nome}')" class="p-2 text-slate-400 hover:text-blue-500"><i class="fas fa-download"></i></button>
-                            <button onclick="deletar('${f.nome}')" class="p-2 text-slate-400 hover:text-red-500"><i class="fas fa-trash-alt"></i></button>
+                            <button onclick="window.open('${API}/download/${f.nome}')" class="p-2 text-slate-400 hover:text-blue-500 transition-colors"><i class="fas fa-download"></i></button>
+                            <button onclick="deletar('${f.nome}')" class="p-2 text-slate-400 hover:text-red-500 transition-colors"><i class="fas fa-trash-alt"></i></button>
                         </div>
                     `;
                     container.appendChild(item);
                 });
-            } catch(e) { container.innerHTML = "Erro ao carregar lista."; }
+            } catch(e) { 
+                container.innerHTML = '<p class="text-red-400 text-center text-xs">Erro ao listar arquivos do servidor.</p>'; 
+            }
         }
 
         async function deletar(n) {
-            if(!confirm("Apagar?")) return;
-            await fetch(`${API}/arquivos/${n}`, {
-                method: 'DELETE',
-                headers: {'x-access-token': localStorage.getItem('token')}
-            });
-            listarArquivos();
-            atualizarCota();
+            if(!confirm(`Excluir permanentemente: ${n}?`)) return;
+            try {
+                const res = await fetch(`${API}/arquivos/${n}`, {
+                    method: 'DELETE',
+                    headers: {'x-access-token': localStorage.getItem('token')}
+                });
+                if(res.ok) {
+                    listarArquivos();
+                    atualizarCota();
+                }
+            } catch(e) { alert("Não foi possível excluir."); }
         }
     </script>
 </body>
 </html>
-
 
