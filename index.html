@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BlazerCloud - Entrar ou Criar Conta</title>
+    <title>BlazerCloud - Gerenciador de Arquivos</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -13,9 +13,11 @@
         .btn-blue { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); transition: all 0.2s; }
         .btn-blue:hover { transform: translateY(-2px); box-shadow: 0 10px 20px -10px #3b82f6; }
         .hidden { display: none; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
     </style>
 </head>
-<body class="min-h-screen">
+<body class="min-h-screen pb-10">
 
     <!-- TELA DE LOGIN / REGISTRO -->
     <div id="login-screen" class="fixed inset-0 flex items-center justify-center px-4 z-50 bg-[#050a15]">
@@ -43,21 +45,46 @@
         </div>
     </div>
 
-    <!-- PAINEL PRINCIPAL (O RESTANTE DO CÓDIGO PERMANECE IGUAL) -->
+    <!-- PAINEL PRINCIPAL -->
     <div id="main-content" class="hidden max-w-3xl mx-auto px-4 pt-8">
-        <!-- ... (Código do Header, Upload e Lista de Arquivos que já te passei antes) ... -->
-        <header class="flex justify-between items-center mb-10">
-            <div><h1 class="text-3xl font-black italic">BLAZER<span class="text-blue-500">CLOUD</span></h1></div>
-            <button onclick="logout()" class="w-10 h-10 rounded-full bg-red-500/10 text-red-500 flex items-center justify-center"><i class="fas fa-power-off"></i></button>
+        <header class="flex justify-between items-center mb-6">
+            <div>
+                <h1 class="text-3xl font-black italic tracking-tighter">BLAZER<span class="text-blue-500">CLOUD</span></h1>
+                <p class="text-[10px] text-slate-500 uppercase tracking-[0.3em]">Gerenciador de Arquivos</p>
+            </div>
+            <button onclick="logout()" class="w-10 h-10 flex items-center justify-center rounded-full bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all">
+                <i class="fas fa-power-off"></i>
+            </button>
         </header>
 
+        <!-- BARRA DE ARMAZENAMENTO -->
+        <div class="glass p-5 rounded-[2rem] mb-6 border border-white/5">
+            <div class="flex justify-between text-[11px] font-bold uppercase mb-3 tracking-widest text-slate-400">
+                <span><i class="fas fa-database mr-2 text-blue-500"></i>Armazenamento</span>
+                <span id="quota-text">Carregando...</span>
+            </div>
+            <div class="w-full h-3 bg-slate-900 rounded-full overflow-hidden p-[2px] border border-white/5">
+                <div id="quota-bar" class="h-full bg-blue-500 rounded-full transition-all duration-1000 shadow-[0_0_15px_rgba(59,130,246,0.5)]" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <!-- ÁREA DE UPLOAD -->
         <section class="glass p-6 rounded-[2.5rem] mb-10 border border-white/5">
-            <input type="file" id="file-input" class="hidden" accept=".zip" onchange="document.getElementById('lt').innerText = this.files[0].name">
-            <label for="file-input" id="lt" class="block w-full border-2 border-dashed border-slate-800 rounded-2xl p-6 text-center cursor-pointer mb-4 text-slate-500 font-bold">Selecionar ZIP</label>
-            <textarea id="file-desc" placeholder="Descrição do arquivo..." class="w-full bg-slate-900 p-4 rounded-2xl mb-4 text-sm outline-none border border-slate-800 h-24"></textarea>
-            <button onclick="upload()" class="w-full py-4 btn-blue text-white font-bold rounded-2xl">Enviar Arquivo</button>
+            <div class="grid grid-cols-1 gap-4 mb-4">
+                <label class="border-2 border-dashed border-slate-800 rounded-2xl p-6 flex flex-col items-center justify-center cursor-pointer hover:border-blue-500 bg-slate-900/30 transition-all group">
+                    <i class="fas fa-cloud-arrow-up text-3xl mb-2 text-slate-600 group-hover:text-blue-500"></i>
+                    <span id="label-text" class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Selecionar Arquivo ZIP</span>
+                    <input type="file" id="file-input" class="hidden" accept=".zip" onchange="atualizarNomeArquivo(this)">
+                </label>
+                <textarea id="file-desc" placeholder="Adicione uma descrição..." class="w-full h-20 bg-slate-900 border border-slate-800 p-4 rounded-2xl text-sm outline-none focus:ring-1 focus:ring-blue-500 resize-none text-white"></textarea>
+            </div>
+            <button onclick="upload()" id="btn-upload" class="w-full py-4 btn-blue text-white font-bold rounded-2xl flex items-center justify-center gap-2">
+                <i class="fas fa-upload"></i> Enviar para Nuvem
+            </button>
         </section>
 
+        <!-- LISTA DE ARQUIVOS -->
+        <h2 class="text-sm font-bold text-slate-500 uppercase tracking-widest mb-4 ml-2">Meus Arquivos</h2>
         <div id="file-list" class="space-y-4"></div>
     </div>
 
@@ -65,6 +92,10 @@
         const PROXY = "https://cors-anywhere.herokuapp.com/";
         const API = "http://blazercraft.falixsrv.me:57488";
         let isRegisterMode = false;
+
+        function atualizarNomeArquivo(input) {
+            if(input.files[0]) document.getElementById('label-text').innerText = input.files[0].name;
+        }
 
         function toggleAuth() {
             isRegisterMode = !isRegisterMode;
@@ -76,13 +107,13 @@
             if(isRegisterMode) {
                 title.innerText = "Crie sua conta gratuita";
                 btnAction.innerText = "Cadastrar Agora";
-                btnAction.setAttribute('onclick', 'registrar()');
+                btnAction.onclick = registrar;
                 btnToggle.innerText = "Já tenho uma conta";
                 toggleText.innerText = "Já é membro?";
             } else {
                 title.innerText = "Acesse sua conta";
                 btnAction.innerText = "Entrar no Sistema";
-                btnAction.setAttribute('onclick', 'fazerLogin()');
+                btnAction.onclick = fazerLogin;
                 btnToggle.innerText = "Criar Nova Conta";
                 toggleText.innerText = "Ainda não tem uma conta?";
             }
@@ -91,21 +122,15 @@
         async function registrar() {
             const username = document.getElementById('user').value;
             const password = document.getElementById('pass').value;
-            if(!username || !password) return alert("Preencha todos os campos");
-
+            if(!username || !password) return alert("Preencha tudo");
             try {
                 const res = await fetch(PROXY + API + "/register", {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({username, password})
                 });
-                const data = await res.json();
-                if(res.ok) {
-                    alert("Conta criada! Agora faça o login.");
-                    toggleAuth();
-                } else {
-                    alert(data.erro || "Erro ao registrar");
-                }
+                if(res.ok) { alert("Conta criada! Faça o login."); toggleAuth(); }
+                else { const d = await res.json(); alert(d.erro); }
             } catch (e) { alert("Erro de conexão"); }
         }
 
@@ -121,62 +146,104 @@
                 const data = await res.json();
                 if (data.token) {
                     localStorage.setItem('blazer_token', data.token);
-                    location.reload();
-                } else alert("Usuário ou senha incorretos");
+                    iniciar();
+                } else alert("Incorreto");
             } catch (e) { alert("Erro de conexão"); }
         }
 
-        // Função para carregar arquivos (mesma do anterior)
+        async function atualizarQuota() {
+            const token = localStorage.getItem('blazer_token');
+            try {
+                const res = await fetch(PROXY + API + "/user_info", { headers: {'x-access-token': token} });
+                const info = await res.json();
+                const usadoMB = (info.usado / (1024 * 1024)).toFixed(2);
+                const limiteMB = (info.limite / (1024 * 1024)).toFixed(0);
+                
+                document.getElementById('quota-text').innerText = `${usadoMB} MB / ${limiteMB} MB`;
+                const bar = document.getElementById('quota-bar');
+                bar.style.width = info.percentual + '%';
+                
+                if(info.percentual > 90) bar.classList.replace('bg-blue-500', 'bg-red-500');
+                else bar.classList.replace('bg-red-500', 'bg-blue-500');
+            } catch (e) {}
+        }
+
         async function listarArquivos() {
             const token = localStorage.getItem('blazer_token');
             const list = document.getElementById('file-list');
             try {
                 const res = await fetch(PROXY + API + "/arquivos", { headers: {'x-access-token': token} });
                 const dados = await res.json();
-                list.innerHTML = '';
+                list.innerHTML = dados.length ? '' : '<p class="text-center py-10 opacity-30 italic">Nenhum arquivo...</p>';
                 dados.forEach(f => {
                     const div = document.createElement('div');
-                    div.className = "glass p-5 rounded-[2rem] flex justify-between items-center";
-                    div.innerHTML = `<div class="flex-1">
-                        <h4 class="font-bold text-white">${f[0]}</h4>
-                        <p class="text-[10px] text-slate-500 italic">${f[3]}</p>
-                    </div>
-                    <div class="flex gap-2">
-                        <a href="${API}/download/${f[0]}" class="p-3 bg-blue-500 rounded-xl text-xs font-bold">Baixar</a>
-                        <button onclick="deletar('${f[0]}')" class="p-3 bg-red-500 rounded-xl text-xs font-bold"><i class="fas fa-trash"></i></button>
-                    </div>`;
+                    div.className = "glass p-5 rounded-[2rem] flex flex-col md:flex-row items-center justify-between gap-4 border border-white/5 hover:border-blue-500/30 transition-all";
+                    div.innerHTML = `
+                        <div class="flex items-center gap-4 flex-1 w-full">
+                            <div class="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center text-blue-500"><i class="fas fa-file-zipper text-xl"></i></div>
+                            <div class="flex-1 truncate">
+                                <h4 class="text-sm font-bold text-white truncate">${f[0]}</h4>
+                                <p class="text-[10px] text-slate-500 italic truncate">${f[3]}</p>
+                                <div class="flex gap-2 text-[8px] text-slate-600 font-bold uppercase mt-1"><span>${f[1]}</span><span>${f[2]}</span></div>
+                            </div>
+                        </div>
+                        <div class="flex gap-2 w-full md:w-auto">
+                            <a href="${API}/download/${f[0]}" class="flex-1 md:flex-none h-10 px-4 bg-blue-500 rounded-xl flex items-center justify-center text-xs font-bold text-white"><i class="fas fa-download mr-2"></i> Baixar</a>
+                            <button onclick="deletar('${f[0]}')" class="w-10 h-10 bg-red-500/10 text-red-500 rounded-xl flex items-center justify-center hover:bg-red-500 hover:text-white transition-all"><i class="fas fa-trash"></i></button>
+                        </div>
+                    `;
                     list.appendChild(div);
                 });
+                atualizarQuota();
             } catch (e) {}
         }
 
         async function upload() {
             const input = document.getElementById('file-input');
             const desc = document.getElementById('file-desc').value;
+            const btn = document.getElementById('btn-upload');
             const token = localStorage.getItem('blazer_token');
-            const formData = new FormData();
-            formData.append('arquivo', input.files[0]);
-            formData.append('descricao', desc);
-            await fetch(PROXY + API + "/upload", { method: 'POST', headers: {'x-access-token': token}, body: formData });
-            location.reload();
+            
+            if(!input.files[0]) return alert("Selecione um ZIP");
+            
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner animate-spin"></i> Enviando...';
+
+            const fd = new FormData();
+            fd.append('arquivo', input.files[0]);
+            fd.append('descricao', desc);
+
+            try {
+                const res = await fetch(PROXY + API + "/upload", { method: 'POST', headers: {'x-access-token': token}, body: fd });
+                if(!res.ok) { const e = await res.json(); alert(e.erro); }
+                else { 
+                    document.getElementById('file-desc').value = "";
+                    document.getElementById('label-text').innerText = "Selecionar Arquivo ZIP";
+                    listarArquivos(); 
+                }
+            } catch (e) { alert("Erro de rede"); }
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-upload"></i> Enviar para Nuvem';
         }
 
         async function deletar(n) {
+            if(!confirm("Apagar " + n + "?")) return;
             const token = localStorage.getItem('blazer_token');
-            await fetch(PROXY + API + "/arquivos/"+n, { method:'DELETE', headers:{'x-access-token': token} });
+            await fetch(PROXY + API + "/arquivos/" + n, { method:'DELETE', headers:{'x-access-token': token} });
+            listarArquivos();
+        }
+
+        function iniciar() {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('main-content').classList.remove('hidden');
             listarArquivos();
         }
 
         function logout() { localStorage.removeItem('blazer_token'); location.reload(); }
 
-        window.onload = () => {
-            if(localStorage.getItem('blazer_token')) {
-                document.getElementById('login-screen').classList.add('hidden');
-                document.getElementById('main-content').classList.remove('hidden');
-                listarArquivos();
-            }
-        }
+        window.onload = () => { if(localStorage.getItem('blazer_token')) iniciar(); }
     </script>
 </body>
 </html>
+
 
