@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BlazerCloud - File Manager</title>
+    <title>BlazerCloud - Gerenciador de Arquivos</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -11,56 +11,87 @@
         body { background-color: #050a15; color: #e2e8f0; font-family: 'Plus Jakarta Sans', sans-serif; }
         .glass { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.05); }
         .btn-blue { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); transition: all 0.2s; }
+        .btn-blue:hover { transform: translateY(-2px); box-shadow: 0 10px 20px -10px #3b82f6; }
         .hidden { display: none; }
-        .modal-bg { background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); }
+        .modal-bg { background: rgba(0,0,0,0.9); backdrop-filter: blur(10px); }
     </style>
 </head>
-<body class="min-h-screen">
+<body class="min-h-screen pb-10">
 
-    <!-- LOGIN -->
+    <!-- TELA DE LOGIN -->
     <div id="login-screen" class="fixed inset-0 flex items-center justify-center px-4 z-50 bg-[#050a15]">
-        <div class="glass p-8 rounded-[2rem] w-full max-w-md shadow-2xl border border-blue-500/20">
-            <h1 class="text-3xl font-extrabold text-white text-center mb-8 italic">BLAZER<span class="text-blue-500">CLOUD</span></h1>
+        <div class="glass p-8 rounded-[2.5rem] w-full max-w-md shadow-2xl border border-blue-500/20 text-center">
+            <h1 class="text-4xl font-extrabold text-white mb-2 italic">BLAZER<span class="text-blue-500">CLOUD</span></h1>
+            <p class="text-slate-500 text-sm mb-8">Acesse seus arquivos na nuvem</p>
             <div class="space-y-4">
-                <input type="text" id="user" placeholder="Usuário" class="w-full bg-slate-900 border border-slate-800 p-4 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500">
-                <input type="password" id="pass" placeholder="Senha" class="w-full bg-slate-900 border border-slate-800 p-4 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500">
-                <button onclick="fazerLogin()" class="w-full py-4 btn-blue text-white font-bold rounded-2xl shadow-lg shadow-blue-500/20">Entrar</button>
+                <div class="relative">
+                    <i class="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"></i>
+                    <input type="text" id="user" placeholder="Usuário" class="w-full bg-slate-900 border border-slate-800 p-4 pl-12 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+                </div>
+                <div class="relative">
+                    <i class="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"></i>
+                    <input type="password" id="pass" placeholder="Senha" class="w-full bg-slate-900 border border-slate-800 p-4 pl-12 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+                </div>
+                <button onclick="fazerLogin()" class="w-full py-4 btn-blue text-white font-bold rounded-2xl shadow-lg">Entrar no Sistema</button>
             </div>
         </div>
     </div>
 
-    <!-- MAIN PANEL -->
-    <div id="main-content" class="hidden max-w-2xl mx-auto px-4 py-8">
-        <header class="flex justify-between items-center mb-8">
-            <h1 class="text-2xl font-black italic">BLAZER<span class="text-blue-500">CLOUD</span></h1>
-            <button onclick="logout()" class="text-slate-500 text-xs font-bold uppercase tracking-widest">Sair</button>
+    <!-- PAINEL PRINCIPAL -->
+    <div id="main-content" class="hidden max-w-3xl mx-auto px-4 pt-8">
+        <header class="flex justify-between items-center mb-10">
+            <div>
+                <h1 class="text-3xl font-black italic tracking-tighter">BLAZER<span class="text-blue-500">CLOUD</span></h1>
+                <p class="text-[10px] text-slate-500 uppercase tracking-[0.3em]">Gerenciador de Arquivos</p>
+            </div>
+            <button onclick="logout()" class="w-10 h-10 flex items-center justify-center rounded-full bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all">
+                <i class="fas fa-power-off"></i>
+            </button>
         </header>
 
-        <!-- Upload -->
-        <div class="glass p-6 rounded-[2rem] mb-8">
-            <label class="border-2 border-dashed border-slate-800 rounded-2xl p-8 flex flex-col items-center cursor-pointer hover:border-blue-500 bg-slate-900/30">
-                <i class="fas fa-file-zipper text-3xl mb-2 text-slate-600"></i>
-                <span id="label-text" class="text-xs font-semibold text-slate-400">Selecionar arquivo</span>
-                <input type="file" id="file-input" class="hidden" accept=".zip" onchange="document.getElementById('label-text').innerText=this.files[0].name">
-            </label>
-            <button onclick="upload()" class="w-full mt-4 py-4 btn-blue text-white font-bold rounded-2xl">Fazer Upload</button>
-        </div>
+        <!-- ÁREA DE UPLOAD -->
+        <section class="glass p-6 rounded-[2.5rem] mb-10 border border-white/5">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <label class="border-2 border-dashed border-slate-800 rounded-2xl p-6 flex flex-col items-center justify-center cursor-pointer hover:border-blue-500 bg-slate-900/30 transition-all group">
+                    <i class="fas fa-cloud-arrow-up text-3xl mb-2 text-slate-600 group-hover:text-blue-500"></i>
+                    <span id="label-text" class="text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">Selecionar ZIP</span>
+                    <input type="file" id="file-input" class="hidden" accept=".zip" onchange="atualizarNomeArquivo(this)">
+                </label>
+                <div class="space-y-4">
+                    <textarea id="file-desc" placeholder="Adicione uma descrição para o arquivo..." class="w-full h-full bg-slate-900 border border-slate-800 p-4 rounded-2xl text-sm outline-none focus:ring-1 focus:ring-blue-500 resize-none"></textarea>
+                </div>
+            </div>
+            <button onclick="upload()" id="btn-upload" class="w-full py-4 btn-blue text-white font-bold rounded-2xl flex items-center justify-center gap-2">
+                <i class="fas fa-upload"></i> Enviar Arquivo
+            </button>
+        </section>
 
-        <div id="file-list" class="space-y-3"></div>
+        <!-- LISTA DE ARQUIVOS -->
+        <h2 class="text-sm font-bold text-slate-500 uppercase tracking-widest mb-4 ml-2">Meus Arquivos</h2>
+        <div id="file-list" class="space-y-4">
+            <!-- Arquivos carregados via JS aparecerão aqui -->
+        </div>
     </div>
 
-    <!-- MODAL DE VISUALIZAÇÃO DE CONTEÚDO -->
+    <!-- MODAL DO ZIP (EXPLORADOR) -->
     <div id="zip-modal" class="hidden fixed inset-0 z-[60] modal-bg p-4 flex items-center justify-center">
-        <div class="glass w-full max-w-lg rounded-[2.5rem] overflow-hidden flex flex-col max-h-[80vh]">
+        <div class="glass w-full max-w-lg rounded-[2.5rem] overflow-hidden flex flex-col max-h-[85vh] shadow-2xl border border-white/10">
             <div class="p-6 border-b border-white/5 flex justify-between items-center bg-white/5">
-                <div>
-                    <h3 id="modal-title" class="font-bold text-blue-400">Arquivo.zip</h3>
-                    <p class="text-[10px] text-slate-500 uppercase tracking-widest">Conteúdo Interno</p>
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-blue-500/20 rounded-xl flex items-center justify-center text-blue-500">
+                        <i class="fas fa-box-archive"></i>
+                    </div>
+                    <div>
+                        <h3 id="modal-title" class="font-bold text-white truncate max-w-[200px]">Arquivo.zip</h3>
+                        <p class="text-[9px] text-blue-400 uppercase tracking-widest font-bold">Conteúdo Interno</p>
+                    </div>
                 </div>
-                <button onclick="fecharModal()" class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-red-500/20 text-slate-400"><i class="fas fa-times"></i></button>
+                <button onclick="fecharModal()" class="w-10 h-10 rounded-full bg-slate-800 text-slate-400 hover:bg-red-500 hover:text-white transition-all flex items-center justify-center">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
-            <div id="modal-body" class="flex-1 overflow-y-auto p-6 space-y-2">
-                <!-- Conteúdo do ZIP será inserido aqui -->
+            <div id="modal-body" class="flex-1 overflow-y-auto p-6 space-y-3 custom-scrollbar">
+                <!-- Conteúdo do ZIP aqui -->
             </div>
         </div>
     </div>
@@ -70,20 +101,28 @@
         const API = "http://blazercraft.falixsrv.me:57488";
         let TOKEN = localStorage.getItem('blazer_token');
 
+        function atualizarNomeArquivo(input) {
+            if(input.files[0]) document.getElementById('label-text').innerText = input.files[0].name;
+        }
+
         async function fazerLogin() {
             const username = document.getElementById('user').value;
             const password = document.getElementById('pass').value;
-            const res = await fetch(PROXY + API + "/login", {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({username, password})
-            });
-            const data = await res.json();
-            if (data.token) {
-                TOKEN = data.token;
-                localStorage.setItem('blazer_token', TOKEN);
-                iniciar();
-            } else alert("Erro no login");
+            if(!username || !password) return alert("Preencha tudo");
+
+            try {
+                const res = await fetch(PROXY + API + "/login", {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({username, password})
+                });
+                const data = await res.json();
+                if (data.token) {
+                    TOKEN = data.token;
+                    localStorage.setItem('blazer_token', TOKEN);
+                    iniciar();
+                } else alert("Usuário ou senha incorretos");
+            } catch (e) { alert("Erro ao conectar com servidor"); }
         }
 
         function iniciar() {
@@ -92,31 +131,52 @@
             listarArquivos();
         }
 
-        function logout() { localStorage.removeItem('blazer_token'); location.reload(); }
+        function logout() { 
+            localStorage.removeItem('blazer_token'); 
+            location.reload(); 
+        }
 
         async function listarArquivos() {
             const list = document.getElementById('file-list');
-            const res = await fetch(PROXY + API + "/arquivos", { headers: {'x-access-token': TOKEN} });
-            const dados = await res.json();
-            list.innerHTML = '';
-            dados.forEach(f => {
-                const div = document.createElement('div');
-                div.className = "glass p-4 rounded-3xl flex items-center justify-between";
-                div.innerHTML = `
-                    <div class="flex items-center gap-4 cursor-pointer flex-1" onclick="verConteudo('${f[0]}')">
-                        <div class="w-10 h-10 bg-blue-500/10 rounded-xl flex items-center justify-center text-blue-400"><i class="fas fa-folder-open"></i></div>
-                        <div>
-                            <h4 class="text-sm font-bold">${f[0]}</h4>
-                            <p class="text-[10px] text-slate-500">${f[1]} KB • Ver interior</p>
+            try {
+                const res = await fetch(PROXY + API + "/arquivos", { headers: {'x-access-token': TOKEN} });
+                const dados = await res.json();
+                
+                if(dados.length === 0) {
+                    list.innerHTML = `<div class="text-center py-20 opacity-20"><i class="fas fa-folder-open text-6xl mb-4"></i><p>Nenhum arquivo encontrado</p></div>`;
+                    return;
+                }
+
+                list.innerHTML = '';
+                dados.forEach(f => {
+                    const div = document.createElement('div');
+                    div.className = "glass p-5 rounded-[2rem] flex flex-col md:flex-row items-center justify-between gap-4 border border-white/5 hover:border-blue-500/30 transition-all group";
+                    div.innerHTML = `
+                        <div class="flex items-center gap-5 cursor-pointer flex-1 w-full" onclick="verConteudo('${f[0]}')">
+                            <div class="w-14 h-14 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-500 shadow-inner group-hover:scale-110 transition-transform">
+                                <i class="fas fa-file-zipper text-2xl"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <h4 class="text-sm font-extrabold text-white truncate">${f[0]}</h4>
+                                <p class="text-[10px] text-slate-500 mb-1 italic">"${f[3] || 'Sem descrição'}"</p>
+                                <div class="flex gap-3 text-[9px] font-bold text-slate-600 uppercase">
+                                    <span><i class="fas fa-weight-hanging mr-1"></i>${f[1]}</span>
+                                    <span><i class="fas fa-calendar-day mr-1"></i>${f[2]}</span>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="flex gap-2">
-                        <a href="${API}/download/${f[0]}" class="p-3 text-blue-400 hover:bg-white/5 rounded-xl"><i class="fas fa-download"></i></a>
-                        <button onclick="deletar('${f[0]}')" class="p-3 text-red-400 hover:bg-white/5 rounded-xl"><i class="fas fa-trash"></i></button>
-                    </div>
-                `;
-                list.appendChild(div);
-            });
+                        <div class="flex items-center gap-2 w-full md:w-auto">
+                            <a href="${API}/download/${f[0]}" class="flex-1 md:flex-none h-12 px-5 bg-white/5 hover:bg-blue-500 hover:text-white rounded-xl flex items-center justify-center transition-all text-xs font-bold gap-2">
+                                <i class="fas fa-download"></i> Baixar
+                            </a>
+                            <button onclick="deletar('${f[0]}')" class="w-12 h-12 bg-white/5 hover:bg-red-500 hover:text-white rounded-xl flex items-center justify-center transition-all text-red-500">
+                                <i class="fas fa-trash-can"></i>
+                            </button>
+                        </div>
+                    `;
+                    list.appendChild(div);
+                });
+            } catch (e) { list.innerHTML = "Erro ao carregar lista."; }
         }
 
         async function verConteudo(nome) {
@@ -125,7 +185,7 @@
             document.getElementById('modal-title').innerText = nome;
             
             modal.classList.remove('hidden');
-            body.innerHTML = '<div class="text-center py-10 animate-pulse text-slate-500 text-sm italic">Lendo interior do arquivo...</div>';
+            body.innerHTML = '<div class="text-center py-12"><div class="inline-block w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div><p class="text-xs mt-4 text-slate-500 italic">Explorando ZIP...</p></div>';
 
             try {
                 const res = await fetch(PROXY + API + "/arquivos/conteudo/" + encodeURIComponent(nome), {
@@ -135,32 +195,60 @@
                 body.innerHTML = '';
                 
                 itens.forEach(item => {
-                    const icon = item.pasta ? 'fa-folder text-amber-500' : 'fa-file text-slate-400';
+                    const icon = item.pasta ? 'fa-folder text-amber-500' : 'fa-file-code text-blue-400';
                     const div = document.createElement('div');
-                    div.className = "flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5 hover:bg-white/10 transition-all";
+                    div.className = "flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5 hover:bg-white/10 transition-all";
                     div.innerHTML = `
                         <div class="flex items-center gap-3 truncate">
-                            <i class="fas ${icon} text-xs"></i>
-                            <span class="text-xs font-medium text-slate-300 truncate">${item.nome}</span>
+                            <i class="fas ${icon}"></i>
+                            <span class="text-xs font-semibold text-slate-300 truncate">${item.nome}</span>
                         </div>
-                        <span class="text-[9px] text-slate-600 font-mono">${(item.tamanho/1024).toFixed(1)} KB</span>
+                        <span class="text-[9px] font-mono text-slate-500">${item.tamanho}</span>
                     `;
                     body.appendChild(div);
                 });
-            } catch (e) { body.innerHTML = '<p class="text-red-500 text-xs text-center">Erro ao ler ZIP.</p>'; }
+            } catch (e) { body.innerHTML = '<p class="text-red-500 text-xs text-center py-10">Erro ao ler interior do arquivo.</p>'; }
         }
 
         function fecharModal() { document.getElementById('zip-modal').classList.add('hidden'); }
 
         async function upload() {
             const input = document.getElementById('file-input');
+            const desc = document.getElementById('file-desc').value;
+            const btn = document.getElementById('btn-upload');
+            
+            if(!input.files[0]) return alert("Selecione um arquivo ZIP primeiro!");
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner animate-spin"></i> Enviando...';
+
             const formData = new FormData();
             formData.append('arquivo', input.files[0]);
-            await fetch(PROXY + API + "/upload", { method: 'POST', headers: {'x-access-token': TOKEN}, body: formData });
-            location.reload();
+            formData.append('descricao', desc);
+
+            try {
+                await fetch(PROXY + API + "/upload", { 
+                    method: 'POST', 
+                    headers: {'x-access-token': TOKEN}, 
+                    body: formData 
+                });
+                location.reload();
+            } catch (e) { 
+                alert("Erro no upload"); 
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-upload"></i> Tentar Novamente';
+            }
         }
 
-        async function deletar(n) { if(confirm('Apagar?')) { await fetch(PROXY + API + "/arquivos/"+encodeURIComponent(n), { method:'DELETE', headers:{'x-access-token': TOKEN} }); listarArquivos(); } }
+        async function deletar(n) { 
+            if(confirm(`Deseja apagar "${n}" permanentemente?`)) { 
+                await fetch(PROXY + API + "/arquivos/"+encodeURIComponent(n), { 
+                    method:'DELETE', 
+                    headers:{'x-access-token': TOKEN} 
+                }); 
+                listarArquivos(); 
+            } 
+        }
 
         if (TOKEN) iniciar();
     </script>
