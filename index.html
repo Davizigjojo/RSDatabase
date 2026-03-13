@@ -3,203 +3,247 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blazercraft - Painel de Controle</title>
+    <title>BlazerCloud - Armazenamento Seguro</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { background-color: #0f172a; color: #f8fafc; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .btn-primary { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); transition: all 0.3s ease; }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4); }
-        input { background: rgba(15, 23, 42, 0.6) !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; color: white !important; }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+        body { background-color: #050a15; color: #e2e8f0; font-family: 'Plus Jakarta Sans', sans-serif; }
+        .glass { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .btn-blue { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); transition: all 0.2s; }
+        .btn-blue:active { transform: scale(0.96); }
+        .hidden { display: none; }
     </style>
 </head>
-<body class="min-h-screen p-4">
+<body class="min-h-screen flex flex-col">
 
-    <div class="max-w-4xl mx-auto">
-        <!-- Cabeçalho -->
-        <header class="flex flex-col md:flex-row justify-between items-center mb-10 gap-4 mt-6">
-            <div>
-                <h1 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-500">
-                    BLAZERCRAFT
-                </h1>
-                <p class="text-slate-400 font-medium">Cloud Files Management System</p>
+    <!-- TELA DE LOGIN -->
+    <div id="login-screen" class="flex-1 flex items-center justify-center px-4">
+        <div class="glass p-8 rounded-[2rem] w-full max-w-md shadow-2xl border border-blue-500/20">
+            <div class="text-center mb-10">
+                <div class="w-16 h-16 bg-blue-600 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-lg shadow-blue-500/40">
+                    <i class="fas fa-vault text-2xl text-white"></i>
+                </div>
+                <h1 class="text-3xl font-extrabold text-white tracking-tight">BLAZER<span class="text-blue-500">CLOUD</span></h1>
+                <p class="text-slate-500 mt-1 italic text-sm font-medium">Acesse seus arquivos compactados</p>
             </div>
-            <div class="flex gap-2">
-                <button onclick="carregarArquivos()" class="btn-primary text-white px-5 py-2.5 rounded-xl flex items-center gap-2 shadow-lg">
-                    <i class="fas fa-sync-alt" id="refresh-icon"></i> Atualizar
+            
+            <div class="space-y-4">
+                <div class="relative">
+                    <i class="fas fa-user absolute left-4 top-4 text-slate-600"></i>
+                    <input type="text" id="user" placeholder="Usuário" class="w-full bg-slate-900/50 border border-slate-800 p-4 pl-12 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 text-white transition-all">
+                </div>
+                <div class="relative">
+                    <i class="fas fa-key absolute left-4 top-4 text-slate-600"></i>
+                    <input type="password" id="pass" placeholder="Senha" class="w-full bg-slate-900/50 border border-slate-800 p-4 pl-12 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 text-white transition-all">
+                </div>
+                <button onclick="fazerLogin()" id="btn-login" class="w-full py-4 btn-blue text-white font-bold rounded-2xl shadow-lg shadow-blue-500/20 mt-2">
+                    Entrar no Sistema
                 </button>
             </div>
+            <p id="login-error" class="text-red-400 text-xs text-center mt-6 hidden font-semibold bg-red-400/10 p-2 rounded-lg">Credenciais incorretas!</p>
+        </div>
+    </div>
+
+    <!-- PAINEL PRINCIPAL (ESCONDIDO POR PADRÃO) -->
+    <div id="main-content" class="hidden flex-1 max-w-2xl mx-auto w-full px-4">
+        <header class="py-10 flex justify-between items-center">
+            <h1 class="text-2xl font-black text-white italic">BLAZER<span class="text-blue-500">CLOUD</span></h1>
+            <button onclick="logout()" class="bg-slate-800/50 hover:bg-red-500/10 text-slate-400 hover:text-red-400 px-4 py-2 rounded-xl transition-all text-xs font-bold uppercase tracking-widest">
+                Sair <i class="fas fa-sign-out-alt ml-1"></i>
+            </button>
         </header>
 
-        <!-- Formulário de Teste (Inserir dade) -->
-        <section class="glass p-6 rounded-2xl mb-8">
-            <h2 class="text-xl font-bold mb-4 text-blue-300"><i class="fas fa-plus-circle mr-2"></i>Adicionar Arquivo de Teste</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <input type="text" id="nome-arq" placeholder="Nome do Arquivo" class="p-3 rounded-lg outline-none">
-                <input type="text" id="desc-arq" placeholder="Descrição" class="p-3 rounded-lg outline-none">
-                <button onclick="enviarArquivo()" id="btn-enviar" class="md:col-span-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold p-3 rounded-lg transition-all">
-                    Gravar no Banco de Dados
+        <!-- Seção de Upload -->
+        <div class="glass p-6 rounded-[2rem] mb-8">
+            <h2 class="text-xs font-bold uppercase tracking-widest text-blue-500 mb-4 flex items-center gap-2">
+                <i class="fas fa-cloud-arrow-up"></i> Upload ZIP/RAR
+            </h2>
+            <div class="space-y-4">
+                <label id="upload-label" class="border-2 border-dashed border-slate-800 rounded-2xl p-8 flex flex-col items-center justify-center cursor-pointer hover:border-blue-500 transition-all bg-slate-900/30">
+                    <i class="fas fa-file-zipper text-4xl mb-3 text-slate-600"></i>
+                    <span id="label-text" class="text-slate-400 text-center text-xs font-semibold">Escolher arquivo compactado</span>
+                    <input type="file" id="file-input" class="hidden" accept=".zip,.rar,.7z" onchange="validarUpload()">
+                </label>
+                <input type="text" id="file-desc" placeholder="Descrição (opcional)..." class="w-full bg-slate-900/50 border border-slate-800 p-4 rounded-xl text-sm outline-none focus:border-blue-500">
+                <button onclick="uploadArquivo()" id="btn-up" disabled class="w-full py-4 rounded-xl font-bold bg-slate-800 text-slate-600 cursor-not-allowed transition-all">
+                    Iniciar Upload
                 </button>
             </div>
-        </section>
+        </div>
 
-        <!-- Status / Erros -->
-        <div id="status-card" class="mb-6 p-4 rounded-xl glass hidden border-l-4 border-yellow-500">
-            <p id="status-msg" class="text-sm"></p>
+        <!-- Alerta do Proxy -->
+        <div id="proxy-warning" class="hidden glass border-l-4 border-amber-500 p-4 mb-6 rounded-r-xl">
+            <p class="text-[11px] text-amber-200 uppercase font-bold tracking-tight">
+                Acesso negado: <a href="https://cors-anywhere.herokuapp.com/corsdemo" target="_blank" class="underline text-blue-400">Ative o servidor de segurança aqui</a> e recarregue.
+            </p>
         </div>
 
         <!-- Lista de Arquivos -->
-        <div class="glass rounded-2xl overflow-hidden shadow-2xl border border-white/5">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left">
-                    <thead class="bg-white/5 text-slate-400">
-                        <tr>
-                            <th class="p-4 font-semibold italic">Documento</th>
-                            <th class="p-4 font-semibold italic text-center">Tamanho</th>
-                            <th class="p-4 font-semibold italic">Data</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabela-corpo" class="divide-y divide-white/5">
-                        <tr>
-                            <td colspan="3" class="p-12 text-center text-slate-500">
-                                <i class="fas fa-circle-notch fa-spin text-3xl mb-3 block text-blue-500"></i>
-                                Aguardando resposta do servidor...
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+        <div id="file-list" class="space-y-3 pb-10">
+            <!-- Gerado via JavaScript -->
         </div>
-
-        <footer class="mt-12 text-center text-slate-600 text-xs">
-            <p>Conexão Direta: <span class="text-slate-400">blazercraft.falixsrv.me</span></p>
-            <p class="mt-1">Powered by PostgreSQL & Python Flask</p>
-        </footer>
     </div>
 
     <script>
-        // SOLUÇÃO PARA O ERRO HTTPS/HTTP:
-        // Usamos um proxy que aceita HTTPS e repassa para o seu HTTP
         const PROXY = "https://cors-anywhere.herokuapp.com/";
-        const REAL_API = "http://blazercraft.falixsrv.me:57488/arquivos";
-        
-        // Tentamos primeiro a direta, se falhar usamos o proxy
-        let API_URL = REAL_API;
+        const API = "http://blazercraft.falixsrv.me:57488";
+        let TOKEN = localStorage.getItem('blazer_token');
 
-        async function carregarArquivos() {
-            const icon = document.getElementById('refresh-icon');
-            const tabela = document.getElementById('tabela-corpo');
-            const statusCard = document.getElementById('status-card');
-            
-            icon.classList.add('fa-spin');
-            
-            try {
-                // Tentativa de fetch
-                let response = await fetch(API_URL);
-                
-                // Se o navegador bloquear por Mixed Content, ele nem chega aqui.
-                // Então, se falhar, tentamos via Proxy na segunda vez automaticamente.
-                if (!response.ok) throw new Error();
+        // FUNÇÃO DE LOGIN
+        async function fazerLogin() {
+            const username = document.getElementById('user').value;
+            const password = document.getElementById('pass').value;
+            const btn = document.getElementById('btn-login');
+            const errorMsg = document.getElementById('login-error');
 
-                const dados = await response.json();
-                renderizarTabela(dados);
-                statusCard.classList.add('hidden');
-            } catch (error) {
-                console.warn("Tentando via Proxy Seguro...");
-                try {
-                    // SEGUNDA TENTATIVA: VIA PROXY
-                    const proxyResponse = await fetch(PROXY + REAL_API);
-                    if(proxyResponse.status === 403) {
-                        mostrarErroProxy();
-                    }
-                    const dados = await proxyResponse.json();
-                    renderizarTabela(dados);
-                } catch (e) {
-                    mostrarErroGeral();
-                }
-            } finally {
-                icon.classList.remove('fa-spin');
-            }
-        }
-
-        function renderizarTabela(dados) {
-            const tabela = document.getElementById('tabela-corpo');
-            tabela.innerHTML = '';
-            if (dados.length === 0) {
-                tabela.innerHTML = `<tr><td colspan="3" class="p-10 text-center text-slate-500">Banco de dados vazio.</td></tr>`;
-                return;
-            }
-            dados.forEach(arq => {
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-white/5 transition-colors";
-                tr.innerHTML = `
-                    <td class="p-4 font-medium text-blue-100">
-                        <div class="flex flex-col">
-                            <span class="flex items-center"><i class="far fa-file-code mr-2 text-blue-400"></i>${arq[0]}</span>
-                            <span class="text-[10px] text-slate-500 ml-6">${arq[3] || 'Sem descrição'}</span>
-                        </div>
-                    </td>
-                    <td class="p-4 text-center text-slate-400 font-mono text-sm">${arq[1]} KB</td>
-                    <td class="p-4 text-slate-500 text-xs">${arq[2]}</td>
-                `;
-                tabela.appendChild(tr);
-            });
-        }
-
-        async function enviarArquivo() {
-            const nome = document.getElementById('nome-arq').value;
-            const desc = document.getElementById('desc-arq').value;
-            const btn = document.getElementById('btn-enviar');
-
-            if(!nome) return alert("Digite um nome!");
+            if(!username || !password) return;
 
             btn.disabled = true;
-            btn.innerHTML = "Gravando...";
-
-            const payload = {
-                nome: nome,
-                tamanho: Math.floor(Math.random() * 1000),
-                data: new Date().toLocaleString(),
-                descricao: desc
-            };
+            btn.innerText = "Verificando...";
+            errorMsg.classList.add('hidden');
 
             try {
-                // Tenta enviar (via proxy para evitar erro de segurança)
-                await fetch(PROXY + REAL_API, {
+                const res = await fetch(PROXY + API + "/login", {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({username, password})
                 });
-                alert("Gravado com sucesso no PostgreSQL!");
-                document.getElementById('nome-arq').value = "";
-                document.getElementById('desc-arq').value = "";
-                carregarArquivos();
+                
+                const data = await res.json();
+                if (data.token) {
+                    TOKEN = data.token;
+                    localStorage.setItem('blazer_token', TOKEN);
+                    iniciarPainel();
+                } else {
+                    errorMsg.classList.remove('hidden');
+                    btn.disabled = false;
+                    btn.innerText = "Entrar no Sistema";
+                }
             } catch (e) {
-                alert("Erro ao gravar. Verifique se o servidor Falix está ligado.");
-            } finally {
+                alert("Erro: Certifique-se de que o Proxy está ativado.");
                 btn.disabled = false;
-                btn.innerHTML = "Gravar no Banco de Dados";
+                btn.innerText = "Entrar no Sistema";
             }
         }
 
-        function mostrarErroProxy() {
-            const statusCard = document.getElementById('status-card');
-            statusCard.classList.remove('hidden');
-            document.getElementById('status-msg').innerHTML = `
-                <b class="text-yellow-400">Atenção:</b> Você precisa ativar o acesso ao Proxy temporário.<br>
-                1. Clique aqui: <a href="https://cors-anywhere.herokuapp.com/corsdemo" target="_blank" class="underline text-blue-400">Ativar Acesso Temporário</a><br>
-                2. Clique no botão "Request temporary access to the demo server".<br>
-                3. Volte aqui e atualize a página.
-            `;
+        // MOSTRAR PAINEL APÓS LOGIN
+        function iniciarPainel() {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('main-content').classList.remove('hidden');
+            carregarArquivos();
         }
 
-        function mostrarErroGeral() {
-            const tabela = document.getElementById('tabela-corpo');
-            tabela.innerHTML = `<tr><td colspan="3" class="p-10 text-center text-red-400">Não foi possível conectar ao servidor. Verifique se a FalixNodes está ONLINE.</td></tr>`;
+        function logout() {
+            localStorage.removeItem('blazer_token');
+            location.reload();
         }
 
-        window.onload = carregarArquivos;
+        // VALIDAR ARQUIVO NO UPLOAD
+        function validarUpload() {
+            const input = document.getElementById('file-input');
+            const btn = document.getElementById('btn-up');
+            const label = document.getElementById('label-text');
+            const box = document.getElementById('upload-label');
+
+            if (input.files[0]) {
+                label.innerText = input.files[0].name;
+                label.className = "text-blue-400 font-bold text-sm";
+                box.className = "border-2 border-solid border-blue-500 rounded-2xl p-8 flex flex-col items-center justify-center bg-blue-500/5";
+                btn.disabled = false;
+                btn.className = "w-full py-4 rounded-xl font-bold btn-blue text-white shadow-lg shadow-blue-500/20 cursor-pointer transition-all";
+                btn.innerText = "Enviar para Nuvem";
+            }
+        }
+
+        // CARREGAR LISTA
+        async function carregarArquivos() {
+            const container = document.getElementById('file-list');
+            container.innerHTML = `<div class="text-center py-10 text-slate-600 italic">Sincronizando...</div>`;
+
+            try {
+                const res = await fetch(PROXY + API + "/arquivos", {
+                    headers: {'x-access-token': TOKEN}
+                });
+                
+                if(res.status === 403) document.getElementById('proxy-warning').classList.remove('hidden');
+                if(res.status === 401) return logout();
+
+                const dados = await res.json();
+                container.innerHTML = '';
+
+                if(dados.length === 0) {
+                    container.innerHTML = `<div class="p-10 glass rounded-[2rem] text-center text-slate-500">Nenhum arquivo guardado.</div>`;
+                    return;
+                }
+
+                dados.forEach(f => {
+                    const card = document.createElement('div');
+                    card.className = "glass p-5 rounded-3xl flex items-center justify-between";
+                    card.innerHTML = `
+                        <div class="flex items-center gap-4 truncate">
+                            <div class="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-400">
+                                <i class="fas fa-file-zipper"></i>
+                            </div>
+                            <div class="truncate">
+                                <h4 class="text-sm font-bold text-white truncate">${f[0]}</h4>
+                                <p class="text-[10px] text-slate-500 font-medium">${f[1]} KB • ${f[3]}</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-2 ml-4">
+                            <a href="${API}/download/${f[0]}" class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-800 text-blue-400 hover:bg-blue-600 hover:text-white transition-all shadow-md">
+                                <i class="fas fa-download"></i>
+                            </a>
+                            <button onclick="deletar('${f[0]}')" class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-800 text-slate-600 hover:text-red-500 transition-all">
+                                <i class="fas fa-trash-can"></i>
+                            </button>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            } catch (e) {
+                container.innerHTML = `<div class="p-10 glass rounded-[2rem] text-center text-red-400">Erro de conexão com o servidor.</div>`;
+            }
+        }
+
+        async function uploadArquivo() {
+            const input = document.getElementById('file-input');
+            const desc = document.getElementById('file-desc');
+            const btn = document.getElementById('btn-up');
+
+            const formData = new FormData();
+            formData.append('arquivo', input.files[0]);
+            formData.append('descricao', desc.value || "Sem descrição");
+
+            btn.disabled = true;
+            btn.innerText = "Fazendo upload...";
+
+            try {
+                await fetch(PROXY + API + "/upload", {
+                    method: 'POST',
+                    headers: {'x-access-token': TOKEN},
+                    body: formData
+                });
+                location.reload();
+            } catch (e) {
+                alert("Erro ao enviar.");
+                btn.disabled = false;
+            }
+        }
+
+        async function deletar(nome) {
+            if(!confirm(`Excluir permanentemente "${nome}"?`)) return;
+            try {
+                await fetch(PROXY + API + "/arquivos/" + encodeURIComponent(nome), {
+                    method: 'DELETE',
+                    headers: {'x-access-token': TOKEN}
+                });
+                carregarArquivos();
+            } catch (e) { alert("Erro ao deletar."); }
+        }
+
+        // VERIFICA SESSÃO AO CARREGAR
+        if (TOKEN) iniciarPainel();
     </script>
 </body>
 </html>
