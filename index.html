@@ -3,44 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Esta linha tenta permitir pedidos HTTP num site HTTPS -->
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
     <title>Blazercraft - Gestor de Arquivos</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body {
-            background-color: #0f172a;
-            color: #f8fafc;
-        }
-        .glass {
-            background: rgba(30, 41, 59, 0.7);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .table-row:hover {
-            background: rgba(51, 65, 85, 0.5);
-        }
+        body { background-color: #0f172a; color: #f8fafc; font-family: sans-serif; }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .table-row:hover { background: rgba(51, 65, 85, 0.5); }
     </style>
 </head>
 <body class="min-h-screen p-4 md:p-8">
 
     <div class="max-w-5xl mx-auto">
-        <!-- Header -->
         <header class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
             <div>
                 <h1 class="text-3xl font-bold text-blue-400"><i class="fas fa-server mr-2"></i>Blazercraft</h1>
                 <p class="text-slate-400">Gestor de Arquivos em Tempo Real</p>
             </div>
-            <button onclick="carregarArquivos()" class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-lg transition-all flex items-center gap-2">
+            <button onclick="carregarArquivos()" class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-lg transition-all flex items-center gap-2 shadow-lg">
                 <i class="fas fa-sync-alt" id="refresh-icon"></i> Atualizar Dados
             </button>
         </header>
 
-        <!-- Status Card -->
         <div id="status-card" class="mb-6 p-4 rounded-lg glass hidden">
             <p id="status-msg" class="text-center"></p>
         </div>
 
-        <!-- Main Table -->
         <div class="glass rounded-xl overflow-hidden shadow-2xl">
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
@@ -50,14 +40,12 @@
                             <th class="p-4">Tamanho</th>
                             <th class="p-4">Modificação</th>
                             <th class="p-4">Descrição</th>
-                            <th class="p-4">Ações</th>
                         </tr>
                     </thead>
                     <tbody id="tabela-corpo">
-                        <!-- Os dados aparecerão aqui -->
                         <tr>
-                            <td colspan="5" class="p-10 text-center text-slate-500 italic">
-                                <i class="fas fa-spinner fa-spin mr-2"></i> Conectando à API...
+                            <td colspan="4" class="p-10 text-center text-slate-500 italic">
+                                <i class="fas fa-spinner fa-spin mr-2"></i> A ligar à API...
                             </td>
                         </tr>
                     </tbody>
@@ -65,75 +53,67 @@
             </div>
         </div>
 
-        <!-- Footer -->
         <footer class="mt-8 text-center text-slate-500 text-sm">
-            <p>&copy; 2026 Blazercraft System - Ligado a rsdatabase.falix.app</p>
+            <p>&copy; 2026 Blazercraft System - Ligado a FalixNodes API</p>
         </footer>
     </div>
 
     <script>
-        // Configuração da sua API na Falix
+        // URL da tua API
         const API_URL = 'http://blazercraft.falixsrv.me:57488/arquivos';
 
         async function carregarArquivos() {
             const icon = document.getElementById('refresh-icon');
             const tabela = document.getElementById('tabela-corpo');
             const statusCard = document.getElementById('status-card');
-            const statusMsg = document.getElementById('status-msg');
-
-            // Efeito visual de loading
+            
             icon.classList.add('fa-spin');
             
             try {
-                const response = await fetch(API_URL);
-                
-                if (!response.ok) throw new Error('Falha ao conectar com a API');
+                // Adicionamos um timeout para não ficar a carregar eternamente
+                const controller = new AbortController();
+                const id = setTimeout(() => controller.abort(), 8000);
+
+                const response = await fetch(API_URL, { signal: controller.signal });
+                clearTimeout(id);
+
+                if (!response.ok) throw new Error('Servidor respondeu com erro');
                 
                 const dados = await response.json();
-                
-                // Limpa a tabela
                 tabela.innerHTML = '';
 
                 if (dados.length === 0) {
-                    tabela.innerHTML = `<tr><td colspan="5" class="p-10 text-center text-slate-400">Nenhum arquivo encontrado no banco.</td></tr>`;
+                    tabela.innerHTML = `<tr><td colspan="4" class="p-10 text-center text-slate-400">Nenhum dado no banco.</td></tr>`;
                 } else {
                     dados.forEach(arquivo => {
-                        // arquivo[0] = Nome, arquivo[1] = Tamanho, arquivo[2] = Data, arquivo[3] = Descrição
                         const tr = document.createElement('tr');
-                        tr.className = 'table-row border-b border-slate-700 transition-colors';
-                        
+                        tr.className = 'table-row border-b border-slate-700';
                         tr.innerHTML = `
-                            <td class="p-4 font-medium text-blue-300">
-                                <i class="far fa-file-alt mr-2"></i>${arquivo[0]}
-                            </td>
+                            <td class="p-4 font-medium text-blue-300"><i class="far fa-file-alt mr-2"></i>${arquivo[0]}</td>
                             <td class="p-4 text-slate-400">${arquivo[1]} KB</td>
                             <td class="p-4 text-slate-400 text-sm">${arquivo[2]}</td>
                             <td class="p-4 text-slate-300">${arquivo[3] || '-'}</td>
-                            <td class="p-4">
-                                <button class="text-slate-400 hover:text-white transition-colors">
-                                    <i class="fas fa-ellipsis-v"></i>
-                                </button>
-                            </td>
                         `;
                         tabela.appendChild(tr);
                     });
                 }
-
                 statusCard.classList.add('hidden');
-
             } catch (error) {
                 console.error('Erro:', error);
                 statusCard.classList.remove('hidden');
-                statusCard.classList.add('bg-red-900/30', 'border-red-500/50');
-                statusMsg.innerHTML = `<i class="fas fa-exclamation-triangle mr-2 text-red-500"></i> Erro ao carregar dados: Certifica-te que o servidor na Falix está online.`;
-                
-                tabela.innerHTML = `<tr><td colspan="5" class="p-10 text-center text-red-400">Erro de conexão.</td></tr>`;
+                statusCard.className = "mb-6 p-4 rounded-lg bg-red-900/40 border border-red-500/50";
+                document.getElementById('status-msg').innerHTML = `
+                    <div class="text-sm">
+                        <b class="block mb-1 text-red-400 text-lg"><i class="fas fa-shield-alt"></i> Bloqueio de Segurança Detetado</b>
+                        Se os dados não aparecerem, clica no ícone de cadeado na barra do navegador e permite "Conteúdo não seguro".
+                    </div>
+                `;
+                tabela.innerHTML = `<tr><td colspan="4" class="p-10 text-center text-red-400">Erro ao aceder à API HTTP via HTTPS.</td></tr>`;
             } finally {
                 icon.classList.remove('fa-spin');
             }
         }
 
-        // Carrega os dados assim que a página abre
         window.onload = carregarArquivos;
     </script>
 </body>
